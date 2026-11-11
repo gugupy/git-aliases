@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>git aliases</title>
+<meta name="description" content="An interactive CLI for managing your global Git aliases. Download a single binary for macOS, Linux, or Windows.">
+<style>
+  :root {
+    --bg: #fbfaf7;
+    --surface: #ffffff;
+    --text: #1d1c1a;
+    --muted: #6b6760;
+    --border: #e4e0d8;
+    --accent: #c2410c;
+    --accent-soft: #fdeee6;
+    --code-bg: #f3f1ec;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141413;
+      --surface: #1c1b19;
+      --text: #ecebe7;
+      --muted: #a19d95;
+      --border: #2f2d2a;
+      --accent: #f08a5d;
+      --accent-soft: #2e1f17;
+      --code-bg: #232220;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 var(--sans);
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 48px 16px 64px; }
+  a { color: var(--accent); }
+  h2 { font-size: 1.25rem; margin: 48px 0 12px; }
+  p { margin: 0 0 12px; }
+  .banner {
+    font: 12px/1.25 var(--mono);
+    color: var(--accent);
+    margin: 0 0 16px;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .lede { font-size: 1.15rem; color: var(--muted); max-width: 36em; }
+  code, pre { font-family: var(--mono); font-size: 0.9em; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    margin: 0 0 12px;
+  }
+  pre code { background: none; padding: 0; }
+
+  .primary {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px;
+    margin: 28px 0 8px;
+  }
+  .btn {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 8px;
+  }
+  @media (prefers-color-scheme: dark) { .btn { color: #141413; } }
+  .btn:hover { filter: brightness(1.08); }
+  .small { font-size: 0.9rem; color: var(--muted); }
+
+  .downloads { display: grid; gap: 8px; margin: 0 0 12px; padding: 0; list-style: none; }
+  .downloads a {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .downloads a:hover { border-color: var(--accent); }
+  .downloads a.match { border-color: var(--accent); background: var(--accent-soft); }
+  .downloads .file { font-family: var(--mono); font-size: 0.85rem; color: var(--muted); overflow-wrap: anywhere; text-align: right; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+
+  .features { padding-left: 20px; margin: 0; }
+  .features li { margin-bottom: 6px; }
+
+  footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<main>
+<pre class="banner" aria-label="git aliases">         _  _              _   _
+  __ _  (_)| |_      __ _ | | (_)  __ _  ___   ___  ___
+ / _` | | || __|    / _` || | | | / _` |/ __| / _ \/ __|
+| (_| | | || |_    | (_| || | | || (_| |\__ \|  __/\__ \
+ \__, | |_| \__|    \__,_||_| |_| \__,_||___/ \___||___/
+ |___/</pre>
+<p class="lede">An interactive command-line tool for managing your global Git aliases. Pick from a set of useful built-in aliases, add your own, and remove the ones you don't use, all without editing <code>~/.gitconfig</code> by hand.</p>
+
+<div class="primary">
+  <a class="btn" id="primary-download" href="https://github.com/gugupy/git-aliases/releases/latest">Download the latest release</a>
+  <span class="small" id="primary-note">Single binary, about 4 MB. Needs only Git.</span>
+</div>
+
+<h2 id="download">Download</h2>
+<p>Each link downloads the binary from the latest release.</p>
+<ul class="downloads">
+  <li><a data-os="mac" data-arch="arm64" href="https://github.com/gugupy/git-aliases/releases/latest/download/git-aliases-darwin-arm64"><span>macOS, Apple Silicon</span><span class="file">git-aliases-darwin-arm64</span></a></li>
+  <li><a data-os="mac" data-arch="amd64" href="https://github.com/gugupy/git-aliases/releases/latest/download/git-aliases-darwin-amd64"><span>macOS, Intel</span><span class="file">git-aliases-darwin-amd64</span></a></li>
+  <li><a data-os="linux" data-arch="amd64" href="https://github.com/gugupy/git-aliases/releases/latest/download/git-aliases-linux-amd64"><span>Linux, x86-64</span><span class="file">git-aliases-linux-amd64</span></a></li>
+  <li><a data-os="linux" data-arch="arm64" href="https://github.com/gugupy/git-aliases/releases/latest/download/git-aliases-linux-arm64"><span>Linux, ARM64</span><span class="file">git-aliases-linux-arm64</span></a></li>
+  <li><a data-os="windows" data-arch="amd64" href="https://github.com/gugupy/git-aliases/releases/latest/download/git-aliases-windows-amd64.exe"><span>Windows, x86-64</span><span class="file">git-aliases-windows-amd64.exe</span></a></li>
+</ul>
+<p class="small">Verify downloads with <a href="https://github.com/gugupy/git-aliases/releases/latest/download/checksums.txt">checksums.txt</a> (SHA-256). Older versions are on the <a href="https://github.com/gugupy/git-aliases/releases">releases page</a>.</p>
+
+<h2>Install</h2>
+<p>Rename the download to <code>git-aliases</code> (<code>git-aliases.exe</code> on Windows) and put it in a folder on your <code>PATH</code>. On macOS or Linux:</p>
+<pre><code>chmod +x git-aliases-*
+mv git-aliases-* /usr/local/bin/git-aliases
+git aliases</code></pre>
+<p>Git runs any program named <code>git-&lt;name&gt;</code> on your <code>PATH</code> as <code>git &lt;name&gt;</code>, so <code>git aliases</code> and <code>git-aliases</code> both work. If macOS blocks the binary, run <code>xattr -d com.apple.quarantine /usr/local/bin/git-aliases</code>.</p>
+<p>With Go installed, you can also build from source:</p>
+<pre><code>git clone https://github.com/gugupy/git-aliases.git
+cd git-aliases
+go install .</code></pre>
+
+<h2>What it does</h2>
+<ul class="features">
+  <li><strong>Built-in aliases:</strong> select from a list of common shortcuts and add them in one step.</li>
+  <li><strong>Custom aliases:</strong> name an alias, pick a Git command from a searchable list, and edit it before saving. It shows a preview and asks before replacing an existing alias.</li>
+  <li><strong>Browse and remove:</strong> filter your global aliases and remove the ones you select.</li>
+  <li><strong>Global config:</strong> aliases are written to your global Git configuration, so they work in every repository.</li>
+</ul>
+
+<h2>Usage</h2>
+<pre><code>git aliases              # start the interactive CLI
+git aliases -h           # usage
+git aliases --version</code></pre>
+<p>In multi-select lists, press Space to toggle an item, Ctrl+A to select all or none, and Enter to confirm. Esc returns to the main menu and Ctrl+C quits.</p>
+
+<h2>Built-in aliases</h2>
+<table>
+  <thead><tr><th>Alias</th><th>Runs</th></tr></thead>
+  <tbody>
+    <tr><td><code>git st</code></td><td><code>git status --short --branch</code></td></tr>
+    <tr><td><code>git co</code></td><td><code>git checkout</code></td></tr>
+    <tr><td><code>git br</code></td><td><code>git branch</code></td></tr>
+    <tr><td><code>git cp</code></td><td><code>git cherry-pick</code></td></tr>
+    <tr><td><code>git ci</code></td><td><code>git commit</code></td></tr>
+    <tr><td><code>git last</code></td><td><code>git log -1 HEAD</code></td></tr>
+    <tr><td><code>git lg</code></td><td><code>git log --oneline --graph --decorate --all</code></td></tr>
+    <tr><td><code>git sp</code></td><td><code>git stash push</code></td></tr>
+    <tr><td><code>git spp</code></td><td><code>git stash pop</code></td></tr>
+    <tr><td><code>git sl</code></td><td><code>git stash list</code></td></tr>
+    <tr><td><code>git theirs</code></td><td><code>git checkout --theirs -- .</code></td></tr>
+    <tr><td><code>git unstage</code></td><td><code>git reset HEAD --</code></td></tr>
+  </tbody>
+</table>
+
+<footer class="small">
+  Source code and issues on <a href="https://github.com/gugupy/git-aliases">GitHub</a>.
+</footer>
+</main>
+
+<script>
+  // Highlight the download that matches the visitor's system.
+  (function () {
+    var ua = navigator.userAgent;
+    var os = /Windows/.test(ua) ? "windows" : /Mac/.test(ua) ? "mac" : /Linux/.test(ua) && !/Android/.test(ua) ? "linux" : null;
+    if (!os) return;
+    var links = document.querySelectorAll('.downloads a[data-os="' + os + '"]');
+    if (!links.length) return;
+    // Browsers don't reliably report CPU type; default to Apple Silicon on
+    // macOS and x86-64 elsewhere, which covers most machines.
+    var arch = /aarch64|arm64/i.test(ua) ? "arm64" : os === "mac" ? "arm64" : "amd64";
+    var pick = document.querySelector('.downloads a[data-os="' + os + '"][data-arch="' + arch + '"]') || links[0];
+    pick.classList.add("match");
+    var btn = document.getElementById("primary-download");
+    btn.href = pick.href;
+    btn.textContent = "Download for " + pick.firstElementChild.textContent;
+    document.getElementById("primary-note").innerHTML = 'Not your system? See <a href="#download">all downloads</a>.';
+  })();
+</script>
+</body>
+</html>

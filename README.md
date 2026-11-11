@@ -24,7 +24,8 @@ configuration. Once installed, run it as `git aliases`. It builds to a single ~4
 
 ### Download a binary
 
-Download the binary for your platform from the
+Get it from the [download page](https://gugupy.github.io/git-aliases/), or
+download the binary for your platform from the
 [Releases page](https://github.com/gugupy/git-aliases/releases), rename it to
 `git-aliases` (`git-aliases.exe` on Windows), and put it in a folder on your
 `PATH`. For example, on an Apple Silicon Mac:
@@ -152,6 +153,9 @@ The [Release workflow](.github/workflows/release.yml) runs the tests,
 cross-compiles every target with `make release` (the version comes from the
 tag, without the leading `v`), and attaches the binaries and `checksums.txt`
 to a GitHub release for that tag, with notes generated from the commits.
+
+The download page at `docs/index.html` is served by GitHub Pages and always
+links to the latest release, so it needs no changes when you publish one.
 
 Project layout:
 
