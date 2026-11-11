@@ -22,6 +22,27 @@ configuration. Once installed, run it as `git aliases`. It builds to a single ~4
 
 ## Install
 
+### Download a binary
+
+Download the binary for your platform from the
+[Releases page](https://github.com/gugupy/git-aliases/releases), rename it to
+`git-aliases` (`git-aliases.exe` on Windows), and put it in a folder on your
+`PATH`. For example, on an Apple Silicon Mac:
+
+```bash
+curl -L -o git-aliases https://github.com/gugupy/git-aliases/releases/latest/download/git-aliases-darwin-arm64
+chmod +x git-aliases
+mv git-aliases /usr/local/bin/
+git aliases
+```
+
+Available builds: `darwin-arm64`, `darwin-amd64`, `linux-amd64`,
+`linux-arm64`, and `windows-amd64.exe`. Each release also includes
+`checksums.txt` with SHA-256 sums. On macOS, if Gatekeeper blocks the
+downloaded binary, run `xattr -d com.apple.quarantine git-aliases`.
+
+### Install from source
+
 Install the `git-aliases` command into Go's bin folder
 (`$(go env GOPATH)/bin`, usually `~/go/bin`; make sure it is on your `PATH`):
 
@@ -117,6 +138,20 @@ make clean                     # remove dist/
 ```
 
 Without `make`, use `go test ./...` and `go build -o dist/git-aliases .`.
+
+### Releasing
+
+Push a version tag to publish a release:
+
+```bash
+git tag v1.2.0
+git push origin v1.2.0
+```
+
+The [Release workflow](.github/workflows/release.yml) runs the tests,
+cross-compiles every target with `make release` (the version comes from the
+tag, without the leading `v`), and attaches the binaries and `checksums.txt`
+to a GitHub release for that tag, with notes generated from the commits.
 
 Project layout:
 
