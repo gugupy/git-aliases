@@ -3,7 +3,7 @@ VERSION ?= 1.0.0
 LDFLAGS := -s -w -X main.version=$(VERSION)
 TARGETS := darwin/arm64 darwin/amd64 linux/amd64 linux/arm64 windows/amd64
 
-.PHONY: build release test clean
+.PHONY: build release test clean demo
 
 # Build for the current machine.
 build:
@@ -20,6 +20,10 @@ release:
 
 test:
 	go test ./...
+
+# Record docs/demo.gif with VHS (brew install vhs).
+demo: build
+	vhs docs/demo.tape
 
 clean:
 	rm -rf dist

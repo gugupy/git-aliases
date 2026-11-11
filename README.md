@@ -13,6 +13,8 @@ Manage your global Git aliases
 An interactive Go CLI for managing useful aliases in Git's global
 configuration. Once installed, run it as `git aliases`. It builds to a single ~4 MB binary for macOS, Linux, and Windows.
 
+![git aliases installing built-in aliases, adding a custom alias, and listing global aliases](docs/demo.gif)
+
 ## Requirements
 
 - Git installed and available on `PATH`
@@ -135,6 +137,7 @@ make test                      # run the tests
 make build                     # build dist/git-aliases for this machine
 make build VERSION=1.2.0       # set the version shown in the banner and --version
 make release                   # cross-compile for macOS, Linux, and Windows into dist/
+make demo                      # re-record docs/demo.gif (needs VHS: brew install vhs)
 make clean                     # remove dist/
 ```
 
