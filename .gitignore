@@ -1,0 +1,23 @@
+# Build output
+dist/
+/git-aliases
+*.exe
+
+# Go test and coverage artifacts
+*.test
+*.out
+coverage.*
+
+# Local Go workspace files
+go.work
+go.work.sum
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Leftovers from the old Python version
+__pycache__/
+*.pyc
