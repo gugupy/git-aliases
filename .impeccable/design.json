@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-26T00:00:00Z",
+  "title": "Design System: git aliases",
+  "extensions": {
+    "colorMeta": {
+      "terminal-ground": { "role": "neutral", "displayName": "Terminal Ground", "tonalRamp": ["#0b0a11", "#13111c", "#1c1928", "#2a2638", "#4a4560", "#8f8aa6", "#cdc8dd", "#f6f5fa"] },
+      "prompt-violet": { "role": "primary", "displayName": "Prompt Violet", "tonalRamp": ["#2e1065", "#4c1d95", "#5b21b6", "#6d28d9", "#8b5cf6", "#a78bfa", "#c4b5fd", "#ede9fe"] },
+      "key-hint-lilac": { "role": "primary", "displayName": "Key-Hint Lilac" },
+      "success-green": { "role": "tertiary", "displayName": "Success Green", "tonalRamp": ["#052e16", "#14532d", "#15803d", "#16a34a", "#22c55e", "#4ade80", "#86efac", "#dcfce7"] },
+      "banner-cyan": { "role": "secondary", "displayName": "Banner Ramp 1" },
+      "banner-purple": { "role": "secondary", "displayName": "Banner Ramp 6" }
+    },
+    "typographyMeta": {
+      "banner": { "displayName": "Banner", "purpose": "The ASCII-art wordmark only." },
+      "title": { "displayName": "Title", "purpose": "# headings and box titles; weight and colour, not size." },
+      "body": { "displayName": "Body", "purpose": "All reading text, max 72ch." },
+      "label": { "displayName": "Label", "purpose": "Key hints, status bar, captions." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "type-command", "value": "steps(11, end) 0.55s", "purpose": "The opening prompt types `git aliases`; disabled under reduced motion." },
+      { "name": "print-line", "value": "cubic-bezier(0.16, 1, 0.3, 1) 0.25s, 40ms stagger", "purpose": "Banner lines print in after the command." },
+      { "name": "cursor-blink", "value": "steps(1) 1.1s infinite", "purpose": "Closing prompt's block cursor." }
+    ],
+    "breakpoints": [ { "name": "mobile", "value": "640px" } ]
+  },
+  "components": [
+    {
+      "name": "Prompt Box", "kind": "card", "refersTo": "prompt-box",
+      "description": "The CLI's violet rounded box around anything the visitor acts on.",
+      "html": "<section class=\"ds-box\"><p class=\"ds-box-title\">Download git aliases</p><p class=\"ds-box-desc\">Single binary, about 4 MB.</p><p class=\"ds-hints\"><kbd>↑/↓</kbd> move · <kbd>Enter</kbd> download</p></section>",
+      "css": ".ds-box{font:15px/1.65 'Commit Mono',ui-monospace,monospace;background:#13111c;color:#e9e7f2;border:1px solid #a78bfa;border-radius:10px;padding:1.25rem 2ch 1rem}.ds-box-title{margin:0 0 .25rem;font-weight:700;color:#a78bfa}.ds-box-desc{color:#948fab;margin:0 0 1rem}.ds-hints{margin:0;padding-top:.75rem;border-top:1px solid #3a3550;color:#948fab;font-size:13px}.ds-hints kbd{font:inherit;color:#c4b5fd;font-weight:700}"
+    },
+    {
+      "name": "Select Row", "kind": "custom", "refersTo": "select-row-cursor",
+      "description": "A list row with the > cursor; the current row gets the tinted band.",
+      "html": "<div class=\"ds-rows\"><a class=\"ds-row ds-on\" href=\"#\"><span>macOS, Apple Silicon</span><span class=\"ds-file\">git-aliases-darwin-arm64</span></a><a class=\"ds-row\" href=\"#\"><span>Linux, x86-64</span><span class=\"ds-file\">git-aliases-linux-amd64</span></a></div>",
+      "css": ".ds-rows{font:15px/1.65 'Commit Mono',ui-monospace,monospace;background:#13111c;padding:8px}.ds-row{display:grid;grid-template-columns:2ch 24ch 1fr;padding:.3rem 1ch;border-radius:4px;color:#e9e7f2;text-decoration:none}.ds-row::before{content:''}.ds-row .ds-file{color:#948fab}.ds-row:hover,.ds-row.ds-on{background:#262040;color:#a78bfa;font-weight:700}.ds-row.ds-on::before,.ds-row:hover::before{content:'>';color:#a78bfa}.ds-row:focus-visible{outline:2px solid #a78bfa}"
+    },
+    {
+      "name": "Command Block", "kind": "custom", "refersTo": "command-block",
+      "description": "$-prefixed commands on the command well with a copy button.",
+      "html": "<div class=\"ds-cmd\"><pre><span class=\"ds-ps1\">$ </span>git aliases <span class=\"ds-c\"># start the CLI</span></pre><button class=\"ds-copy\">copy</button></div>",
+      "css": ".ds-cmd{position:relative;font:15px/1.65 'Commit Mono',ui-monospace,monospace;background:#1a1725;color:#e9e7f2;border-radius:6px;padding:.85rem 9ch .85rem 2ch}.ds-cmd pre{margin:0;font:inherit}.ds-ps1{color:#a78bfa;font-weight:700}.ds-c{color:#948fab}.ds-copy{position:absolute;top:.55rem;right:1ch;font:13px 'Commit Mono',monospace;background:#1a1725;color:#948fab;border:1px solid #3a3550;border-radius:4px;padding:.1rem 1ch;cursor:pointer}.ds-copy:hover{color:#e9e7f2;border-color:#948fab}.ds-copy:focus-visible{outline:2px solid #a78bfa;outline-offset:2px}"
+    },
+    {
+      "name": "Status Bar", "kind": "nav", "refersTo": "status-window-current",
+      "description": "tmux-style navigation: session chip and numbered windows.",
+      "html": "<nav class=\"ds-bar\"><span class=\"ds-sess\">git-aliases</span><a class=\"ds-win ds-cur\" href=\"#\">1:download</a><a class=\"ds-win\" href=\"#\">2:install</a></nav>",
+      "css": ".ds-bar{display:flex;gap:1.5ch;align-items:center;font:13px/2.5rem 'Commit Mono',ui-monospace,monospace;background:#1c1928;border-bottom:1px solid #3a3550;padding:0 2ch}.ds-sess{background:#a78bfa;color:#13111c;font-weight:700;padding:0 1ch;border-radius:3px;line-height:1.6}.ds-win{color:#948fab;text-decoration:none;padding:.15rem .5ch;border-radius:3px;line-height:1.4}.ds-win:hover{color:#e9e7f2}.ds-win.ds-cur{background:#262040;color:#e9e7f2}.ds-win.ds-cur::after{content:'*';color:#a78bfa}.ds-win:focus-visible{outline:2px solid #a78bfa}"
+    },
+    {
+      "name": "Note Box", "kind": "card", "refersTo": "note-box",
+      "description": "The CLI's gray note box for reference content.",
+      "html": "<section class=\"ds-note\"><p class=\"ds-nt\">Keys</p><dl class=\"ds-keys\"><dt>Space</dt><dd>toggle an item</dd><dt>Esc</dt><dd>back to the main menu</dd></dl></section>",
+      "css": ".ds-note{font:15px/1.65 'Commit Mono',ui-monospace,monospace;background:#13111c;color:#e9e7f2;border:1px solid #3a3550;border-radius:10px;padding:1.25rem 2ch 1rem}.ds-nt{margin:0 0 .25rem;font-weight:700}.ds-keys{display:grid;grid-template-columns:12ch 1fr;gap:.3rem 1ch;margin:0}.ds-keys dt{color:#c4b5fd;font-weight:700}.ds-keys dd{margin:0}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Session Is the Page",
+    "overview": "Everything on the web reads as one `git aliases` terminal session. The page opens with the command being typed, the CLI's gradient banner prints, and every section after it is either a command and its output or a box the real TUI would draw. Nothing is a picture of a terminal: there is no window chrome, no traffic-light dots and no fake title bar. The page ground is the terminal ground, and the content is set as text a visitor can select and copy.",
+    "keyCharacteristics": [
+      "One self-hosted monospace (Commit Mono) for every role, banner included.",
+      "`$` prompts and `#` comment headings; the CLI's own copy (menu items, key hints) shown verbatim.",
+      "Rounded 1px boxes only where the CLI draws them: violet around prompts, gray around notes.",
+      "A `>` cursor row with a tinted band marks the current choice in every list.",
+      "Keyboard parity with the TUI: arrows or j/k move, Enter acts, number keys jump between status-bar windows."
+    ],
+    "rules": [
+      { "name": "The Banner-Only Ramp Rule", "body": "The cyan-to-purple ramp lives in the banner and nowhere else. No gradient fills, gradient text or gradient buttons.", "section": "colors" },
+      { "name": "The CLI Source Rule", "body": "Every accent traces back to a lipgloss style in `main.go` or `banner.go`. A new colour needs a matching CLI use first.", "section": "colors" },
+      { "name": "The Weight-Not-Size Rule", "body": "Hierarchy comes from bold, violet and dim, as in a terminal. Only the banner and the lede step up in size.", "section": "typography" },
+      { "name": "The No-Shadow Rule", "body": "Nothing floats. A layer is a tonal field or a 1px rule.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do write sections as commands and their output, or as boxes the CLI actually draws.",
+      "Do use the CLI's real copy (menu labels, key names, flag syntax) verbatim.",
+      "Do give every list a `>` cursor and TUI keys (arrows, j/k, Enter), plus normal pointer behaviour.",
+      "Do keep both colour profiles: dark ground `#13111c`, light ground `#f6f5fa`.",
+      "Do theme browser surfaces: violet selection, violet focus ring, a rule-coloured scrollbar."
+    ],
+    "donts": [
+      "Don't draw a terminal window frame, traffic-light dots or a fake title bar. The page is the terminal.",
+      "Don't use the banner ramp outside the banner.",
+      "Don't add shadows or a second typeface.",
+      "Don't show output Git or the CLI would not produce without labelling it, as with the aligned `--get-regexp` columns."
+    ]
+  }
+}

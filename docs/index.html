@@ -5,211 +5,509 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>git aliases</title>
 <meta name="description" content="An interactive CLI for managing your global Git aliases. Download a single binary for macOS, Linux, or Windows.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#13111c" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f6f5fa" media="(prefers-color-scheme: light)">
+<link rel="preload" href="fonts/commit-mono-400.woff2" as="font" type="font/woff2" crossorigin>
 <style>
-  /* Colors from the CLI: the banner fades cyan (#22D3EE) to purple (#C084FC),
-     the accent is #A78BFA, and key hints are #C4B5FD. Light mode uses
-     darker shades of the same hues so text stays readable on white. */
-  :root {
-    --bg: #f8f7fc;
-    --surface: #ffffff;
-    --text: #1e1b2e;
-    --muted: #6b6880;
-    --border: #e2e0ee;
-    --accent: #7c3aed;
-    --accent-soft: #f1ebfe;
-    --code-bg: #f1f0f7;
-    --gradient: linear-gradient(90deg, #22d3ee, #60a5fa, #a78bfa, #c084fc);
-    --term-bg: #13111c;
-    --term-border: #a78bfa;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* Commit Mono, SIL Open Font License 1.1 (fonts/LICENSE.txt). */
+  @font-face {
+    font-family: "Commit Mono";
+    src: url("fonts/commit-mono-400.woff2") format("woff2");
+    font-weight: 400;
+    font-display: swap;
   }
-  @media (prefers-color-scheme: dark) {
+  @font-face {
+    font-family: "Commit Mono";
+    src: url("fonts/commit-mono-700.woff2") format("woff2");
+    font-weight: 700;
+    font-display: swap;
+  }
+
+  /* Colors come from the CLI: the banner ramp (#22D3EE to #C084FC), the
+     #A78BFA accent, and #C4B5FD key hints. The light profile uses darker
+     shades of the same hues so text stays readable on a light ground. */
+  :root {
+    --bg: #13111c;
+    --bar: #1c1928;
+    --well: #1a1725;
+    --fg: #e9e7f2;
+    --dim: #948fab;
+    --rule: #3a3550;
+    --accent: #a78bfa;
+    --hint: #c4b5fd;
+    --cursor-bg: #262040;
+    --ok: #4ade80;
+    --b1: #22d3ee; --b2: #38bdf8; --b3: #60a5fa; --b4: #818cf8; --b5: #a78bfa; --b6: #c084fc;
+    --mono: "Commit Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light) {
     :root {
-      --bg: #0f0d17;
-      --surface: #17151f;
-      --text: #e9e7f2;
-      --muted: #9d99b0;
-      --border: #2a2738;
-      --accent: #a78bfa;
-      --accent-soft: #1f1a33;
-      --code-bg: #1b1925;
-      --term-bg: #13111c;
+      --bg: #f6f5fa;
+      --bar: #e9e7f2;
+      --well: #edebf4;
+      --fg: #1e1b2e;
+      --dim: #5d5873;
+      --rule: #cdc8dd;
+      --accent: #6d28d9;
+      --hint: #5b21b6;
+      --cursor-bg: #e6defc;
+      --ok: #15803d;
+      --b1: #0e7490; --b2: #0369a1; --b3: #1d4ed8; --b4: #4338ca; --b5: #6d28d9; --b6: #7e22ce;
+      color-scheme: light;
     }
   }
+
   * { box-sizing: border-box; }
+  html { scroll-padding-top: 3.5rem; scrollbar-color: var(--rule) var(--bg); }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
   body {
     margin: 0;
     background: var(--bg);
-    color: var(--text);
-    font: 16px/1.6 var(--sans);
+    color: var(--fg);
+    font: 15px/1.65 var(--mono);
+    font-variant-ligatures: none;
+    -webkit-text-size-adjust: 100%;
   }
-  main { max-width: 760px; margin: 0 auto; padding: 48px 16px 64px; }
-  a { color: var(--accent); }
-  h2 { font-size: 1.25rem; margin: 48px 0 12px; }
-  p { margin: 0 0 12px; }
-  /* The banner sits in a terminal-style box with the CLI's rounded purple border. */
-  .terminal {
-    background: var(--term-bg);
-    border: 1px solid var(--term-border);
-    border-radius: 12px;
-    padding: 20px 24px;
-    margin: 0 0 24px;
-    overflow-x: auto;
+  ::selection { background: var(--accent); color: var(--bg); }
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:hover { color: var(--hint); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+  p { margin: 0 0 0.9rem; }
+  strong { font-weight: 700; }
+  code { font-family: inherit; color: var(--hint); }
+  .dim { color: var(--dim); }
+  .visually-hidden {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
   }
+
+  /* Status bar along the top, in the manner of tmux: a session name and
+     numbered windows. Number keys jump to the matching window. */
+  .status {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bar);
+    border-bottom: 1px solid var(--rule);
+  }
+  .status-inner > * { font-size: 13px; }
+  .status-inner {
+    display: flex; align-items: center; gap: 2ch;
+    max-width: 92ch; margin: 0 auto; padding: 0 2ch;
+    height: 2.5rem;
+    overflow-x: auto; white-space: nowrap; scrollbar-width: none;
+  }
+  .session { color: var(--bg); background: var(--accent); font-weight: 700; padding: 0 1ch; border-radius: 3px; }
+  .windows { display: flex; gap: 1.5ch; margin: 0; padding: 0; list-style: none; }
+  .windows a { color: var(--dim); text-decoration: none; padding: 0.15rem 0.5ch; border-radius: 3px; }
+  .windows a:hover { color: var(--fg); }
+  .windows a[aria-current="true"] { color: var(--fg); background: var(--cursor-bg); }
+  .windows a[aria-current="true"]::after { content: "*"; color: var(--accent); }
+  .status .right { margin-left: auto; color: var(--dim); }
+  .status .right a { color: var(--fg); }
+
+  main { max-width: 92ch; margin: 0 auto; padding: 2.5rem 2ch 3rem; }
+  .measure { max-width: 72ch; }
+
+  /* Prompt lines. The "$" is not selectable, so copied text is the command. */
+  .line { margin: 0; white-space: pre-wrap; }
+  .ps1 { color: var(--accent); font-weight: 700; user-select: none; -webkit-user-select: none; }
+  .comment { color: var(--dim); }
+
   .banner {
-    font: bold 12px/1.25 var(--mono);
-    margin: 0;
+    margin: 1.1rem 0 0.4rem;
+    font: 700 min(17px, calc((100vw - 4ch) / 34.5)) / 1.2 var(--mono);
     white-space: pre;
+    overflow: hidden;
   }
   .banner span { display: block; }
-  .subtitle { font: 12px/1.5 var(--mono); color: #8b87a0; margin: 10px 0 0; }
-  .lede { font-size: 1.15rem; color: var(--muted); max-width: 36em; }
-  code, pre { font-family: var(--mono); font-size: 0.9em; }
-  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
-  pre {
-    background: var(--code-bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px 16px;
-    overflow-x: auto;
-    margin: 0 0 12px;
+  .banner .l1 { color: var(--b1); } .banner .l2 { color: var(--b2); } .banner .l3 { color: var(--b3); }
+  .banner .l4 { color: var(--b4); } .banner .l5 { color: var(--b5); } .banner .l6 { color: var(--b6); }
+  .subtitle { color: var(--dim); margin-bottom: 1.6rem; }
+  .lede { font-size: 1.07rem; line-height: 1.6; max-width: 62ch; margin-bottom: 2rem; }
+
+  /* Rounded boxes as the CLI draws them: purple around prompts, gray around notes. */
+  .box {
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 1.25rem 2ch 1rem;
   }
-  pre code { background: none; padding: 0; }
-
-  .primary {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px;
-    margin: 28px 0 8px;
+  .box.note { border-color: var(--rule); }
+  .box-title { margin: 0 0 0.25rem; font-size: 1rem; font-weight: 700; color: var(--accent); }
+  .box.note .box-title { color: var(--fg); }
+  .box-desc { color: var(--dim); margin-bottom: 1rem; max-width: 72ch; }
+  .hints {
+    margin: 1rem 0 0; padding-top: 0.75rem;
+    border-top: 1px solid var(--rule);
+    color: var(--dim); font-size: 13px;
   }
-  .btn {
-    display: inline-block;
-    background: var(--gradient);
-    color: #13111c;
-    text-decoration: none;
-    font-weight: 600;
-    padding: 10px 18px;
-    border-radius: 8px;
+  .hints kbd { font-family: inherit; color: var(--hint); font-weight: 700; }
+  .hints .sep { padding: 0 1ch; }
+
+  /* The select list: one row per build, a ">" cursor on the current row. */
+  .select { margin: 0; padding: 0; list-style: none; }
+  .select a {
+    display: grid; grid-template-columns: 2ch 24ch 1fr auto; align-items: baseline;
+    padding: 0.3rem 1ch;
+    border-radius: 4px;
+    color: var(--fg); text-decoration: none;
   }
-  .btn:hover { filter: brightness(1.08); }
-  .small { font-size: 0.9rem; color: var(--muted); }
+  .select a::before { content: ""; color: var(--accent); font-weight: 700; }
+  .select a .file { color: var(--dim); overflow-wrap: anywhere; }
+  .select a .tag { color: var(--dim); font-size: 13px; padding-left: 1ch; }
+  .select a.cursor { background: var(--cursor-bg); color: var(--accent); font-weight: 700; }
+  .select a.cursor::before { content: ">"; }
+  .select a.cursor .file { color: var(--fg); font-weight: 400; }
+  .select a:focus-visible { outline-offset: 0; }
+  .after-box { color: var(--dim); font-size: 13px; margin: 0.75rem 0 0; }
+  .after-box a { color: var(--dim); }
+  .after-box a:hover { color: var(--fg); }
 
-  .downloads { display: grid; gap: 8px; margin: 0 0 12px; padding: 0; list-style: none; }
-  .downloads a {
-    display: flex; justify-content: space-between; align-items: center; gap: 12px;
-    padding: 12px 16px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    text-decoration: none;
+  /* Section headings read as shell comments. */
+  h2.section {
+    margin: 4.5rem 0 1rem;
+    font-size: 1rem; font-weight: 700;
+    color: var(--accent);
   }
-  .downloads a:hover { border-color: var(--accent); }
-  .downloads a.match { border-color: var(--accent); background: var(--accent-soft); }
-  .downloads .file { font-family: var(--mono); font-size: 0.85rem; color: var(--muted); overflow-wrap: anywhere; text-align: right; }
+  h2.section::before { content: "# "; color: var(--dim); font-weight: 400; }
 
-  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
-  th { color: var(--muted); font-weight: 600; }
-  td:first-child code { color: var(--accent); font-weight: 600; }
-  h2 { color: var(--accent); }
+  /* Command blocks with a copy control. */
+  .cmd {
+    position: relative;
+    margin: 0 0 1.1rem;
+    padding: 0.85rem 9ch 0.85rem 2ch;
+    background: var(--well);
+    border-radius: 6px;
+  }
+  .cmd pre { margin: 0; font: inherit; white-space: pre; overflow-x: auto; }
+  .cmd .out { color: var(--dim); }
+  .copy {
+    position: absolute; top: 0.55rem; right: 1ch;
+    font: inherit; font-size: 13px;
+    background: var(--well); color: var(--dim);
+    border: 1px solid var(--rule); border-radius: 4px;
+    padding: 0.1rem 1ch; cursor: pointer;
+  }
+  .copy:hover { color: var(--fg); border-color: var(--dim); }
+  .copy.done { color: var(--ok); border-color: currentColor; }
 
-  .features { padding-left: 20px; margin: 0; }
-  .features li { margin-bottom: 6px; }
+  .demo { margin: 0; }
+  .demo img {
+    display: block; width: 100%; height: auto;
+    border: 1px solid var(--rule); border-radius: 10px;
+  }
+  .demo figcaption { color: var(--dim); font-size: 13px; margin-top: 0.6rem; }
 
-  footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--border); }
+  /* The CLI's main menu, live: moving the cursor shows what each item does. */
+  .menu { margin: 0; padding: 0; list-style: none; }
+  .menu button {
+    display: grid; grid-template-columns: 2ch 32ch 1fr; width: 100%;
+    font: inherit; text-align: left; color: var(--fg);
+    background: none; border: 0; border-radius: 4px;
+    padding: 0.3rem 1ch; cursor: pointer;
+  }
+  .menu button::before { content: ""; color: var(--accent); font-weight: 700; }
+  .menu button .desc { color: var(--dim); }
+  .menu button[aria-selected="true"] { background: var(--cursor-bg); color: var(--accent); font-weight: 700; }
+  .menu button[aria-selected="true"]::before { content: ">"; }
+  .menu button[aria-selected="true"] .desc { color: var(--fg); font-weight: 400; }
+  .menu button:focus-visible { outline-offset: 0; }
+  .menu-out { margin-top: 1.1rem; min-height: 4.95em; }
+  .menu-out p { margin: 0; max-width: 72ch; }
+  .menu-out .ok { color: var(--ok); }
+
+  .keys { display: grid; grid-template-columns: 12ch 1fr; gap: 0.3rem 1ch; margin: 0; }
+  .keys dt { color: var(--hint); font-weight: 700; }
+  .keys dd { margin: 0; }
+
+  table.aliases { border-collapse: collapse; margin: 0; }
+  table.aliases td { padding: 0 2ch 0 0; vertical-align: top; }
+  table.aliases td:first-child { color: var(--accent); font-weight: 700; white-space: nowrap; }
+
+  footer { margin-top: 4.5rem; }
+  .cursor-block {
+    display: inline-block; width: 1ch; height: 1.15em; vertical-align: -0.2em;
+    background: var(--fg);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .cursor-block { animation: blink 1.1s steps(1) infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* The one authored moment: the command types, then the banner prints. */
+    .typed {
+      display: inline-block; vertical-align: bottom;
+      overflow: hidden; white-space: nowrap;
+      animation: type 0.55s steps(11, end) 0.15s both;
+    }
+    @keyframes type { from { width: 0; } to { width: 11ch; } }
+    .banner span, .banner + .subtitle { animation: print 0.25s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .banner .l1 { animation-delay: 0.8s; } .banner .l2 { animation-delay: 0.84s; }
+    .banner .l3 { animation-delay: 0.88s; } .banner .l4 { animation-delay: 0.92s; }
+    .banner .l5 { animation-delay: 0.96s; } .banner .l6 { animation-delay: 1s; }
+    .banner + .subtitle { animation-delay: 1.06s; }
+    @keyframes print { from { opacity: 0; transform: translateY(2px); } }
+  }
+
+  @media (max-width: 640px) {
+    body { font-size: 14px; }
+    main { padding-top: 1.75rem; }
+    .status .right .press { display: none; }
+    .select a { grid-template-columns: 2ch 1fr; }
+    .select a .file { grid-column: 2; font-size: 13px; }
+    .select a .tag { grid-column: 2; padding-left: 0; }
+    .menu button { grid-template-columns: 2ch 1fr; }
+    .cmd { padding-right: 2ch; }
+    .menu button .desc { grid-column: 2; font-size: 13px; }
+    .keys { grid-template-columns: 10ch 1fr; }
+    .menu-out { min-height: 8.25em; }
+    .cmd { display: flex; flex-direction: column; }
+    .cmd pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .copy { position: static; align-self: flex-end; margin-top: 0.6rem; }
+    h2.section { margin-top: 3.5rem; }
+  }
 </style>
 </head>
 <body>
+<nav class="status" aria-label="Sections">
+  <div class="status-inner">
+    <span class="session">git-aliases</span>
+    <ul class="windows">
+      <li><a href="#download">1:download</a></li>
+      <li><a href="#install">2:install</a></li>
+      <li><a href="#features">3:features</a></li>
+      <li><a href="#usage">4:usage</a></li>
+      <li><a href="#aliases">5:aliases</a></li>
+    </ul>
+    <span class="right"><span class="press">press 1–5 · </span><a href="https://github.com/gugupy/git-aliases">github</a></span>
+  </div>
+</nav>
+
 <main>
-<div class="terminal">
-<pre class="banner" aria-label="git aliases"><span style="color:#22D3EE">         _  _              _   _</span><span style="color:#38BDF8">  __ _  (_)| |_      __ _ | | (_)  __ _  ___   ___  ___</span><span style="color:#60A5FA"> / _` | | || __|    / _` || | | | / _` |/ __| / _ \/ __|</span><span style="color:#818CF8">| (_| | | || |_    | (_| || | | || (_| |\__ \|  __/\__ \</span><span style="color:#A78BFA"> \__, | |_| \__|    \__,_||_| |_| \__,_||___/ \___||___/</span><span style="color:#C084FC"> |___/</span></pre>
+<p class="line" aria-hidden="true"><span class="ps1">$</span> <span class="typed">git aliases</span></p>
+<h1 class="visually-hidden">git aliases</h1>
+<pre class="banner" aria-hidden="true"><span class="l1">         _  _              _   _</span><span class="l2">  __ _  (_)| |_      __ _ | | (_)  __ _  ___   ___  ___</span><span class="l3"> / _` | | || __|    / _` || | | | / _` |/ __| / _ \/ __|</span><span class="l4">| (_| | | || |_    | (_| || | | || (_| |\__ \|  __/\__ \</span><span class="l5"> \__, | |_| \__|    \__,_||_| |_| \__,_||___/ \___||___/</span><span class="l6"> |___/</span></pre>
 <p class="subtitle">Manage your global Git aliases</p>
-</div>
+
 <p class="lede">An interactive command-line tool for managing your global Git aliases. Pick from a set of useful built-in aliases, add your own, and remove the ones you don't use, all without editing <code>~/.gitconfig</code> by hand.</p>
 
-<div class="primary">
-  <a class="btn" id="primary-download" href="https://github.com/gugupy/git-aliases/releases/latest">Download the latest release</a>
-  <span class="small" id="primary-note">Single binary, about 4 MB. Needs only Git.</span>
+<section class="box" aria-labelledby="download">
+  <h2 class="box-title" id="download">Download git aliases</h2>
+  <p class="box-desc">Single binary, about 4 MB. Needs only Git. Each entry downloads from the latest release.</p>
+  <ul class="select" id="downloads">
+    <li><a class="cursor" data-os="mac" data-arch="arm64" href="https://github.com/gugupy/git-aliases/releases/latest/download/git-aliases-darwin-arm64"><span>macOS, Apple Silicon</span><span class="file">git-aliases-darwin-arm64</span></a></li>
+    <li><a data-os="mac" data-arch="amd64" href="https://github.com/gugupy/git-aliases/releases/latest/download/git-aliases-darwin-amd64"><span>macOS, Intel</span><span class="file">git-aliases-darwin-amd64</span></a></li>
+    <li><a data-os="linux" data-arch="amd64" href="https://github.com/gugupy/git-aliases/releases/latest/download/git-aliases-linux-amd64"><span>Linux, x86-64</span><span class="file">git-aliases-linux-amd64</span></a></li>
+    <li><a data-os="linux" data-arch="arm64" href="https://github.com/gugupy/git-aliases/releases/latest/download/git-aliases-linux-arm64"><span>Linux, ARM64</span><span class="file">git-aliases-linux-arm64</span></a></li>
+    <li><a data-os="windows" data-arch="amd64" href="https://github.com/gugupy/git-aliases/releases/latest/download/git-aliases-windows-amd64.exe"><span>Windows, x86-64</span><span class="file">git-aliases-windows-amd64.exe</span></a></li>
+  </ul>
+  <p class="hints"><kbd>Tab</kbd> focus<span class="sep">·</span><kbd>↑/↓</kbd> or <kbd>j/k</kbd> move<span class="sep">·</span><kbd>Enter</kbd> download</p>
+</section>
+<p class="after-box">Verify with <a href="https://github.com/gugupy/git-aliases/releases/latest/download/checksums.txt">checksums.txt</a> (SHA-256). Older versions are on the <a href="https://github.com/gugupy/git-aliases/releases">releases page</a>.</p>
+
+<h2 class="section" id="demo">See it run</h2>
+<figure class="demo">
+  <img src="demo.gif" width="1200" height="820" loading="lazy" alt="git aliases installing built-in aliases, adding a custom alias, and listing global aliases">
+  <figcaption>Recorded with VHS against a throwaway Git config.</figcaption>
+</figure>
+
+<h2 class="section" id="install">Install</h2>
+<div class="measure">
+<p>Rename the download to <code>git-aliases</code> (<code>git-aliases.exe</code> on Windows) and put it in a folder on your <code>PATH</code>. On macOS or Linux:</p>
+<div class="cmd"><pre><span class="ps1">$ </span>chmod +x git-aliases-*
+<span class="ps1">$ </span>mv git-aliases-* /usr/local/bin/git-aliases
+<span class="ps1">$ </span>git aliases</pre></div>
+<p>Git runs any program named <code>git-&lt;name&gt;</code> on your <code>PATH</code> as <code>git &lt;name&gt;</code>, so <code>git aliases</code> and <code>git-aliases</code> both work. If macOS blocks the binary:</p>
+<div class="cmd"><pre><span class="ps1">$ </span>xattr -d com.apple.quarantine /usr/local/bin/git-aliases</pre></div>
+<p>With Go installed, you can also build from source:</p>
+<div class="cmd"><pre><span class="ps1">$ </span>git clone https://github.com/gugupy/git-aliases.git
+<span class="ps1">$ </span>cd git-aliases
+<span class="ps1">$ </span>go install .</pre></div>
 </div>
 
-<h2 id="download">Download</h2>
-<p>Each link downloads the binary from the latest release.</p>
-<ul class="downloads">
-  <li><a data-os="mac" data-arch="arm64" href="https://github.com/gugupy/git-aliases/releases/latest/download/git-aliases-darwin-arm64"><span>macOS, Apple Silicon</span><span class="file">git-aliases-darwin-arm64</span></a></li>
-  <li><a data-os="mac" data-arch="amd64" href="https://github.com/gugupy/git-aliases/releases/latest/download/git-aliases-darwin-amd64"><span>macOS, Intel</span><span class="file">git-aliases-darwin-amd64</span></a></li>
-  <li><a data-os="linux" data-arch="amd64" href="https://github.com/gugupy/git-aliases/releases/latest/download/git-aliases-linux-amd64"><span>Linux, x86-64</span><span class="file">git-aliases-linux-amd64</span></a></li>
-  <li><a data-os="linux" data-arch="arm64" href="https://github.com/gugupy/git-aliases/releases/latest/download/git-aliases-linux-arm64"><span>Linux, ARM64</span><span class="file">git-aliases-linux-arm64</span></a></li>
-  <li><a data-os="windows" data-arch="amd64" href="https://github.com/gugupy/git-aliases/releases/latest/download/git-aliases-windows-amd64.exe"><span>Windows, x86-64</span><span class="file">git-aliases-windows-amd64.exe</span></a></li>
-</ul>
-<p class="small">Verify downloads with <a href="https://github.com/gugupy/git-aliases/releases/latest/download/checksums.txt">checksums.txt</a> (SHA-256). Older versions are on the <a href="https://github.com/gugupy/git-aliases/releases">releases page</a>.</p>
+<h2 class="section" id="features">What it does</h2>
+<section class="box" aria-labelledby="menu-title">
+  <p class="box-title" id="menu-title">What would you like to do?</p>
+  <ul class="menu" role="tablist" aria-labelledby="menu-title" aria-orientation="vertical">
+    <li role="presentation"><button role="tab" id="t-install" aria-controls="p-install" aria-selected="true"><span>Install built-in aliases</span><span class="desc">Choose shortcuts for common Git commands</span></button></li>
+    <li role="presentation"><button role="tab" id="t-custom" aria-controls="p-custom" aria-selected="false" tabindex="-1"><span>Add or update a custom alias</span><span class="desc">Pick a command and preview it before saving</span></button></li>
+    <li role="presentation"><button role="tab" id="t-manage" aria-controls="p-manage" aria-selected="false" tabindex="-1"><span>View, filter, or remove aliases</span><span class="desc">Manage your global Git config</span></button></li>
+    <li role="presentation"><button role="tab" id="t-quit" aria-controls="p-quit" aria-selected="false" tabindex="-1"><span>Quit</span></button></li>
+  </ul>
+  <div class="menu-out">
+    <div role="tabpanel" id="p-install" aria-labelledby="t-install"><p>Select from a list of common shortcuts and add them in one step. Space toggles an item, Ctrl+A selects all or none. The full list is <a href="#aliases">below</a>.</p></div>
+    <div role="tabpanel" id="p-custom" aria-labelledby="t-custom"><p>Name an alias, pick a Git command from a searchable list (press <code>/</code>), and edit it before saving. It previews the command and asks before replacing an alias that runs something different.</p></div>
+    <div role="tabpanel" id="p-manage" aria-labelledby="t-manage"><p>Filter your global aliases by name or command, then remove the ones you select.</p></div>
+    <div role="tabpanel" id="p-quit" aria-labelledby="t-quit"><p>Esc on the main menu, or Ctrl+C anywhere. Aliases you saved are already in your global Git configuration, so they work in every repository.</p></div>
+  </div>
+  <p class="hints"><kbd>↑/↓</kbd> move<span class="sep">·</span><kbd>Enter</kbd> select<span class="sep">·</span><kbd>Esc</kbd> quit</p>
+</section>
 
-<h2>Install</h2>
-<p>Rename the download to <code>git-aliases</code> (<code>git-aliases.exe</code> on Windows) and put it in a folder on your <code>PATH</code>. On macOS or Linux:</p>
-<pre><code>chmod +x git-aliases-*
-mv git-aliases-* /usr/local/bin/git-aliases
-git aliases</code></pre>
-<p>Git runs any program named <code>git-&lt;name&gt;</code> on your <code>PATH</code> as <code>git &lt;name&gt;</code>, so <code>git aliases</code> and <code>git-aliases</code> both work. If macOS blocks the binary, run <code>xattr -d com.apple.quarantine /usr/local/bin/git-aliases</code>.</p>
-<p>With Go installed, you can also build from source:</p>
-<pre><code>git clone https://github.com/gugupy/git-aliases.git
-cd git-aliases
-go install .</code></pre>
+<h2 class="section" id="usage">Usage</h2>
+<div class="cmd"><pre><span class="ps1">$ </span>git aliases              <span class="comment"># start the interactive CLI</span>
+<span class="ps1">$ </span>git aliases -h           <span class="comment"># usage (--help opens Git's man pages)</span>
+<span class="ps1">$ </span>git aliases --version</pre></div>
+<section class="box note" aria-labelledby="keys-title">
+  <h3 class="box-title" id="keys-title">Keys</h3>
+  <dl class="keys">
+    <dt>Space</dt><dd>toggle an item in a multi-select list</dd>
+    <dt>Ctrl+A</dt><dd>select all or none</dd>
+    <dt>Enter</dt><dd>confirm, or move to the next field</dd>
+    <dt>Tab</dt><dd>next field (Shift+Tab: previous)</dd>
+    <dt>/</dt><dd>search the list of Git commands</dd>
+    <dt>Esc</dt><dd>back to the main menu</dd>
+    <dt>Ctrl+C</dt><dd>quit</dd>
+  </dl>
+</section>
 
-<h2>What it does</h2>
-<ul class="features">
-  <li><strong>Built-in aliases:</strong> select from a list of common shortcuts and add them in one step.</li>
-  <li><strong>Custom aliases:</strong> name an alias, pick a Git command from a searchable list, and edit it before saving. It shows a preview and asks before replacing an existing alias.</li>
-  <li><strong>Browse and remove:</strong> filter your global aliases and remove the ones you select.</li>
-  <li><strong>Global config:</strong> aliases are written to your global Git configuration, so they work in every repository.</li>
-</ul>
-
-<h2>Usage</h2>
-<pre><code>git aliases              # start the interactive CLI
-git aliases -h           # usage
-git aliases --version</code></pre>
-<p>In multi-select lists, press Space to toggle an item, Ctrl+A to select all or none, and Enter to confirm. Esc returns to the main menu and Ctrl+C quits.</p>
-
-<h2>Built-in aliases</h2>
-<table>
-  <thead><tr><th>Alias</th><th>Runs</th></tr></thead>
+<h2 class="section" id="aliases">Built-in aliases</h2>
+<p class="measure">After installing them all, list them the way Git stores them (output aligned here for reading):</p>
+<div class="cmd"><pre><span class="ps1">$ </span>git config --global --get-regexp '^alias\.'</pre></div>
+<table class="aliases">
+  <caption class="visually-hidden">Built-in aliases and the Git command each one runs</caption>
+  <thead class="visually-hidden"><tr><th scope="col">Alias</th><th scope="col">Command</th></tr></thead>
   <tbody>
-    <tr><td><code>git st</code></td><td><code>git status --short --branch</code></td></tr>
-    <tr><td><code>git co</code></td><td><code>git checkout</code></td></tr>
-    <tr><td><code>git br</code></td><td><code>git branch</code></td></tr>
-    <tr><td><code>git cp</code></td><td><code>git cherry-pick</code></td></tr>
-    <tr><td><code>git ci</code></td><td><code>git commit</code></td></tr>
-    <tr><td><code>git last</code></td><td><code>git log -1 HEAD</code></td></tr>
-    <tr><td><code>git lg</code></td><td><code>git log --oneline --graph --decorate --all</code></td></tr>
-    <tr><td><code>git sp</code></td><td><code>git stash push</code></td></tr>
-    <tr><td><code>git spp</code></td><td><code>git stash pop</code></td></tr>
-    <tr><td><code>git sl</code></td><td><code>git stash list</code></td></tr>
-    <tr><td><code>git theirs</code></td><td><code>git checkout --theirs -- .</code></td></tr>
-    <tr><td><code>git unstage</code></td><td><code>git reset HEAD --</code></td></tr>
+    <tr><td>alias.st</td><td>status --short --branch</td></tr>
+    <tr><td>alias.co</td><td>checkout</td></tr>
+    <tr><td>alias.br</td><td>branch</td></tr>
+    <tr><td>alias.cp</td><td>cherry-pick</td></tr>
+    <tr><td>alias.ci</td><td>commit</td></tr>
+    <tr><td>alias.last</td><td>log -1 HEAD</td></tr>
+    <tr><td>alias.lg</td><td>log --oneline --graph --decorate --all</td></tr>
+    <tr><td>alias.sp</td><td>stash push</td></tr>
+    <tr><td>alias.spp</td><td>stash pop</td></tr>
+    <tr><td>alias.sl</td><td>stash list</td></tr>
+    <tr><td>alias.theirs</td><td>checkout --theirs -- .</td></tr>
+    <tr><td>alias.unstage</td><td>reset HEAD --</td></tr>
   </tbody>
 </table>
+<p class="measure dim" style="margin-top:1.1rem">So <code>git st</code> runs <code>git status --short --branch</code>. During a merge conflict, <code>git theirs</code> takes the incoming side for every conflicted path; review the result and run <code>git add</code> when ready.</p>
 
-<footer class="small">
-  Source code and issues on <a href="https://github.com/gugupy/git-aliases">GitHub</a>.
+<footer>
+  <p class="line comment"># Source code and issues: <a href="https://github.com/gugupy/git-aliases">github.com/gugupy/git-aliases</a></p>
+  <p class="line"><span class="ps1">$</span> <span class="cursor-block" aria-hidden="true"></span></p>
 </footer>
 </main>
 
 <script>
-  // Highlight the download that matches the visitor's system.
-  (function () {
-    var ua = navigator.userAgent;
-    var os = /Windows/.test(ua) ? "windows" : /Mac/.test(ua) ? "mac" : /Linux/.test(ua) && !/Android/.test(ua) ? "linux" : null;
-    if (!os) return;
-    var links = document.querySelectorAll('.downloads a[data-os="' + os + '"]');
-    if (!links.length) return;
+(function () {
+  // Download list: highlight the visitor's system and move the cursor with
+  // the keyboard, like the CLI's select prompts.
+  var list = document.getElementById("downloads");
+  var rows = Array.prototype.slice.call(list.querySelectorAll("a"));
+
+  function setCursor(row, focus) {
+    rows.forEach(function (r) {
+      var on = r === row;
+      r.classList.toggle("cursor", on);
+      r.tabIndex = on ? 0 : -1;
+    });
+    if (focus) row.focus();
+  }
+
+  var ua = navigator.userAgent;
+  var os = /Windows/.test(ua) ? "windows" : /Mac/.test(ua) ? "mac" : /Linux/.test(ua) && !/Android/.test(ua) ? "linux" : null;
+  var start = rows[0];
+  if (os) {
     // Browsers don't reliably report CPU type; default to Apple Silicon on
     // macOS and x86-64 elsewhere, which covers most machines.
     var arch = /aarch64|arm64/i.test(ua) ? "arm64" : os === "mac" ? "arm64" : "amd64";
-    var pick = document.querySelector('.downloads a[data-os="' + os + '"][data-arch="' + arch + '"]') || links[0];
-    pick.classList.add("match");
-    var btn = document.getElementById("primary-download");
-    btn.href = pick.href;
-    btn.textContent = "Download for " + pick.firstElementChild.textContent;
-    document.getElementById("primary-note").innerHTML = 'Not your system? See <a href="#download">all downloads</a>.';
-  })();
+    var pick = list.querySelector('a[data-os="' + os + '"][data-arch="' + arch + '"]') ||
+               list.querySelector('a[data-os="' + os + '"]');
+    if (pick) {
+      start = pick;
+      var tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = "detected";
+      pick.appendChild(tag);
+      pick.setAttribute("aria-label", pick.firstElementChild.textContent + ", detected, " + pick.querySelector(".file").textContent);
+    }
+  }
+  setCursor(start, false);
+
+  function moveKeys(e, items, current, activate) {
+    var i = items.indexOf(current);
+    var next = null;
+    if (e.key === "ArrowDown" || e.key === "j") next = items[(i + 1) % items.length];
+    else if (e.key === "ArrowUp" || e.key === "k") next = items[(i - 1 + items.length) % items.length];
+    else if (e.key === "Home") next = items[0];
+    else if (e.key === "End") next = items[items.length - 1];
+    if (!next) return;
+    e.preventDefault();
+    activate(next);
+  }
+
+  list.addEventListener("keydown", function (e) {
+    if (e.target.tagName !== "A") return;
+    moveKeys(e, rows, e.target, function (r) { setCursor(r, true); });
+  });
+  rows.forEach(function (r) {
+    r.addEventListener("mouseenter", function () { setCursor(r, false); });
+  });
+
+  // Main menu: a tab list whose cursor shows what each item does.
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.menu [role="tab"]'));
+  function selectTab(tab, focus) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+    });
+    if (focus) tab.focus();
+  }
+  selectTab(tabs[0], false);
+  tabs.forEach(function (t) {
+    t.addEventListener("click", function () { selectTab(t, false); });
+    t.addEventListener("mouseenter", function () { selectTab(t, false); });
+    t.addEventListener("keydown", function (e) {
+      moveKeys(e, tabs, t, function (n) { selectTab(n, true); });
+    });
+  });
+
+  // Copy buttons on command blocks; the "$ " prompts are left out.
+  document.querySelectorAll(".cmd").forEach(function (block) {
+    if (!navigator.clipboard) return;
+    var pre = block.querySelector("pre");
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy";
+    btn.textContent = "copy";
+    btn.setAttribute("aria-label", "Copy commands");
+    btn.addEventListener("click", function () {
+      var text = pre.innerText.split("\n").map(function (l) {
+        return l.replace(/^\$ /, "").replace(/\s+#.*$/, "");
+      }).join("\n").trim();
+      navigator.clipboard.writeText(text).then(function () {
+        btn.textContent = "◆ copied";
+        btn.classList.add("done");
+      }, function () {
+        btn.textContent = "copy failed";
+      });
+      setTimeout(function () { btn.textContent = "copy"; btn.classList.remove("done"); }, 1600);
+    });
+    block.appendChild(btn);
+  });
+
+  // Status bar: mark the window in view, and jump with number keys.
+  var links = Array.prototype.slice.call(document.querySelectorAll(".windows a"));
+  var targets = links.map(function (a) { return document.querySelector(a.getAttribute("href")); });
+  function markCurrent() {
+    var y = window.scrollY + window.innerHeight * 0.35;
+    var current = 0;
+    targets.forEach(function (t, i) { if (t.getBoundingClientRect().top + window.scrollY <= y) current = i; });
+    links.forEach(function (a, i) { a.setAttribute("aria-current", i === current ? "true" : "false"); });
+  }
+  window.addEventListener("scroll", markCurrent, { passive: true });
+  markCurrent();
+  document.addEventListener("keydown", function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey || e.defaultPrevented) return;
+    var n = parseInt(e.key, 10);
+    if (n >= 1 && n <= links.length) {
+      e.preventDefault();
+      links[n - 1].click();
+    }
+  });
+})();
 </script>
 </body>
 </html>
